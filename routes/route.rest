@@ -1,0 +1,70 @@
+GET http://localhost:5000/user
+
+
+###
+GET http://localhost:5000/user
+
+###
+POST http://localhost:5000/api/v1/user/create
+Content-Type: application/json
+
+{
+    "email": "testuser2@gmail.com",
+    "password": "pashword",
+    "owner": false
+}
+
+###
+POST http://localhost:5000/api/v1/user/login
+Content-Type: application/json
+
+{
+    "email": "testa@gmail.com",
+    "password": "pashword"
+}
+
+###
+
+POST http://localhost:5000/api/video/upload
+Content-Type: application/json
+{
+    "title": "title",
+    "description": "description",
+    "uploadDate": 2020,
+    "authorId": 000 ,
+    "thumbnail": ,
+      "views":0,
+      "likes":0,
+      "disliked":0,
+      "metaData":[],
+      "comments":
+      [
+          {
+            "mongoId":000,
+            "date":2020,
+            "username":"me",
+            "comment":"comment",
+            "likes""0",
+            "dislikes":0,
+            "reply":
+            [
+                {
+                "mongoId":000,
+                "username":"me",
+                "comment":"comment",
+                "likes":0,
+                "dislikes:0"
+                }
+            ]
+           }
+      ]
+    
+}
+
+###
+POST https://sandbox.api.video/auth/api-key
+
+{
+        "apiKey": "SkGQnAbt0xEwWBiglfTPtITEMQYY7fUZ8bQ95mfHKz"
+}
+
