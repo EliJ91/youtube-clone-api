@@ -62,9 +62,9 @@ Content-Type: application/json
 }
 
 ###
-POST https://sandbox.api.video/auth/api-key
+POST "https://ws.api.video/videos/videoId/source"
 
-{
-        "apiKey": "SkGQnAbt0xEwWBiglfTPtITEMQYY7fUZ8bQ95mfHKz"
-}
 
+###
+
+POST http://localhost:5000/api/video/upload
