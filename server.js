@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const axios =require('axios');
 var cors = require('cors')
 
 
@@ -18,8 +19,22 @@ app.use(cors())
 const UserRouter = require('./routes/users.routes')
 app.use('/api/user', UserRouter)
 
+uploadAuth = async (req, res, next) => {
+  axios.post('https://sandbox.api.video/auth/api-key', {
+    "apiKey": "SkGQnAbt0xEwWBiglfTPtITEMQYY7fUZ8bQ95mfHKz"
+  })
+  .then(function (response) {
+    req.API_AUTH_TOKEN = response.data.access_token
+    next()
+  })
+  .catch(function (error) {
+    console.log(error);
+    console.log('ERROR')
+  })
+}
+
 const VideoRouter = require('./routes/videos.routes')
-app.use('/api/video', VideoRouter)
+app.use('/api/video', uploadAuth,VideoRouter)
 
 
 const PORT = process.env.PORT || 5000

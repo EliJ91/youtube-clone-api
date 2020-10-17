@@ -1,44 +1,61 @@
+const multer = require('multer');
 const express = require('express');
 const router = express.Router();
-const axios =require('axios');
+
+
 //GET AUTH TOKEN\
 
+const storage = multer.diskStorage({
+  destination: function (req,file,cb) {
+    cb(null,'public')
+  },
+  filename: function (req, file, cb){
+    const newFileName = `${file.fieldname}`
 
-uploadAuth = async (req, res, next) => {
-    axios.post('https://sandbox.api.video/auth/api-key', {
-      "apiKey": "SkGQnAbt0xEwWBiglfTPtITEMQYY7fUZ8bQ95mfHKz"
-    })
-    .then(function (response) {
-      req.API_AUTH_TOKEN = response.data.access_token
-      next()
-    })
-    .catch(function (error) {
-      console.log(error);
-      console.log('ERROR')
-    })
-} 
+    cb(null, newFileName)
+  }
+})
+
+const upload = multer({storage}).single("video")
+
+ 
 
 
-router.post('/upload', uploadAuth, async (req, res ) =>{
-    let  path  = req.body;
+router.post('/upload',upload, async (req, res ) =>{
+  
+  console.log("hi")
+
+
+  // if(req.file){
+  //   const filename = req.file.filename;
+  //   const {title,description} = req.body;
+
+  //   console.log(filename)
+  // }
+  
+  
+  // let  path  = req.body;
+    // console.log(req.API_AUTH_TOKEN)
+    // let file = path.file
     
-    axios.post('http://sandbox.api.video/videos',
-        {
-            "title":path.title,
-            "description":path.description,
-            "source":path.movie[0].path
-        },{headers: {
-            'Authorization': `Bearer ${res.req.API_AUTH_TOKEN}` 
-          }
-        })
-        .then(function (response) {
-            console.log(response);
-            console.log("GOOD")
-          })
-          .catch(function (error) {
-            console.log(error);
-            console.log("ERROR")
-          });
+    // axios.post('http://sandbox.api.video/videos',
+    //     {
+    //         "title":path.title,
+    //         "description":path.description,
+    //         "source":path.movie[0].path
+    //     },{headers: {
+    //         'Authorization': `Bearer ${req.API_AUTH_TOKEN}`,
+    //         'content-type': 'application/json' 
+    //       }
+    //     })
+    //     .then(function (response) {
+    //         console.log(response);
+    //         console.log("GOOD")
+    //       })
+    //       .catch(function (error) {
+    //         console.log(error);
+    //         console.log("ERROR")
+    //       });
 
 
     
