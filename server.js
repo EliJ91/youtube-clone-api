@@ -3,8 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const axios =require('axios');
-var cors = require('cors')
+const axios = require('axios');
+const cors = require('cors')
+const fileUpload = require('express-fileupload')
 
 
 mongoose.connect(process.env.MONGO_URI,{ useUnifiedTopology: true, useNewUrlParser: true })
@@ -15,10 +16,13 @@ db.once('open', ()=>console.log("Connected to DB."))
 
 app.use(express.json())
 app.use(cors())
+app.use(fileUpload())
 
 const UserRouter = require('./routes/users.routes')
 app.use('/api/user', UserRouter)
 
+
+//Upload Endpoint
 uploadAuth = async (req, res, next) => {
   axios.post('https://sandbox.api.video/auth/api-key', {
     "apiKey": "SkGQnAbt0xEwWBiglfTPtITEMQYY7fUZ8bQ95mfHKz"
@@ -32,7 +36,6 @@ uploadAuth = async (req, res, next) => {
     console.log('ERROR')
   })
 }
-
 const VideoRouter = require('./routes/videos.routes')
 app.use('/api/video', uploadAuth,VideoRouter)
 
