@@ -4,7 +4,6 @@ const router = express.Router();
 const axios = require('axios');
 const AWS = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid');
-var fs = require('fs');
 
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ID,

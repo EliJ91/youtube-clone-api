@@ -1,8 +1,3 @@
-GET http://localhost:5000/user
-
-
-###
-GET http://localhost:5000/user
 
 ###
 POST http://localhost:5000/api/v1/user/create
@@ -15,56 +10,24 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:5000/api/v1/user/login
+POST http://localhost:5000/api/user/login
 Content-Type: application/json
 
 {
-    "email": "testa@gmail.com",
-    "password": "pashword"
+    "username": "test",
+    "password": "t"
 }
 
-###
 
-POST http://localhost:5000/api/video/upload
-Content-Type: application/json
-{
-    "title": "title",
-    "description": "description",
-    "uploadDate": 2020,
-    "authorId": 000 ,
-    "thumbnail": ,
-      "views":0,
-      "likes":0,
-      "disliked":0,
-      "metaData":[],
-      "comments":
-      [
-          {
-            "mongoId":000,
-            "date":2020,
-            "username":"me",
-            "comment":"comment",
-            "likes""0",
-            "dislikes":0,
-            "reply":
-            [
-                {
-                "mongoId":000,
-                "username":"me",
-                "comment":"comment",
-                "likes":0,
-                "dislikes:0"
-                }
-            ]
-           }
-      ]
-    
-}
 
+#without valid cookie
 ###
-POST "https://ws.api.video/videos/videoId/source"
+POST http://localhost:5000/api/user/testauth
+Cookie: ggg
 
 
 ###
-
-POST http://localhost:5000/api/video/upload
+#with valid cookie
+POST http://localhost:5000/api/user/testauth
+Cookie: eyJhbGciOiJIUzI1NiJ9.dGVzdA.E9EpnvqwFgmHvu5gV7WwwsSlQe9sPrXASrx2QGI9jsI
+request.cookies.clear

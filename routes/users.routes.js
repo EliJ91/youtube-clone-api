@@ -1,6 +1,16 @@
+require('dotenv').config();
+
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const {auth} = require('../middleware/authorization.middleware')
+
+
+const cookieParser= require('cookie-parser')
+var app = express()
+app.use(cookieParser())
+
 
 //CREATE USER REQUIREMENTS
 const UserRegistration = require('../models/user')
@@ -8,20 +18,20 @@ const UserRegistration = require('../models/user')
 ///
 
 //LOGIN USER REQUIREMENTS
-const User = require('../models/user')
-const jwt = require('jsonwebtoken')
+const User = require('../models/user');
+
 ///
 
 //CREATE NEW USER
 router.post('/create', async (req, res) => {
-  const {email, password, owner} = req.body
+  const {username, password} = req.body
   try {
     let createdUser = await UserRegistration.findOne({
-      email
+      username
     })
     if (createdUser) {
       res.status(422).json({
-        errors: [
+        error: [
           {
             msg: 'User already exists'
           }
@@ -29,9 +39,8 @@ router.post('/create', async (req, res) => {
       })
     } else {
       createdUser = new UserRegistration({
-        email,
-        password,
-        owner
+        username,
+        password
       })
       const salt = await bcrypt.genSalt(10)
 
@@ -50,14 +59,14 @@ router.post('/create', async (req, res) => {
 //LOGIN USER
 router.post('/login', async (req, res) => {
     try {
-      const email = req.body.email
+      const username = req.body.username
       const password = req.body.password
   
-      if (!email || !password) {
+      if (!username || !password) {
         return res.status(400).json({ msg: 'Please enter required fields' })
       }
       const loginUser = await User.findOne({
-        email: email
+        username: username
       })
       if (!loginUser) {
         res.status(422).json({
@@ -71,12 +80,13 @@ router.post('/login', async (req, res) => {
         bcrypt.compare(password, loginUser.password).then((isMatch) => {
           if (!isMatch) {
             console.log('not a match')
-            return res.status(422).json({ msg: 'Invalid credentials' })
+            return res.status(401).json({ msg: 'Password is invalid.' })
           }
           loginUser.password = undefined
-          const accessToken = jwt.sign(loginUser.email, process.env.JWT_SECRET)
+          const accessToken = jwt.sign(loginUser.username, process.env.JWT_SECRET)
+          res.cookie('token', accessToken, { httpOnly: true })
+          res.status(201).json({loginUser})
           
-          res.status(201).json({accessToken: accessToken,loginUser})
           
         })
       }
@@ -85,7 +95,21 @@ router.post('/login', async (req, res) => {
     }
   })
 
+ router.post("/testauth", auth, async (req,res)=>{
+   console.log('made it to end point')
+ })
 
+
+
+
+ router.post("/deletecookie", async (req,res)=>{
+   res.clearCookie('token')
+})
+router.post("/testcookie", async (req,res)=>{
+  
+  console.log(req.cookies.token)
+  console.log(req.headers.cookie)
+})
  
 module.exports = router
 
