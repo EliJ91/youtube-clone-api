@@ -2,66 +2,52 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { response } = require('express');
+const AWS = require('aws-sdk')
+const { v4: uuidv4 } = require('uuid');
 var fs = require('fs');
 
-
-var middleware = {
-  saveVideo: async (req, res, next) => {
-console.log('saved video hit')
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ID,
+  secretAccessKey: process.env.AWS_SECRET
+})
+  async function saveVideo(req, res, next){
+    console.log('saved video hit')
     if(req.files === null){
        return res.status(400).json({msg: 'No file uploaded'})
      }
      const file = req.files.file
-     file.mv(`${__dirname}/uploads/${file.name}`, error => {
-       if(error){
-         console.error(error)
-         return res.status(500).send(error)
-       }
-       req.fileName = file.name
-       next()
+     let myFile = file.name.split(".")
+     const fileType = myFile[myFile.length-1]
+     const params = {
+       Bucket: process.env.AWS_BUCKET,
+       Key: `${uuidv4()}.${fileType}`,
+       Body: file.data
+     }
+
+      s3.upload(params, (error,data)=>{
+          if(error){res.status(500).send(error)}
+          req.videoUrl = data.Location
+          next()
+          res.status(200)
      })
-   
-   },
-   uploadVideo: async (req, res, next) => {
-     console.log('upload video hit')
-    axios.post('http://sandbox.api.video/videos',
-    {
-        "title":"test",
-        "description":"testD",
-        "source":`/uploads/${req.fileName}`
-    }   
-    ,
-    {
-      headers: {
-        'Authorization': `Bearer ${res.req.API_AUTH_TOKEN}` 
-      }
-    })
-    .then(function (response) {
-      fs.writeFile("./good.txt", (response), (err) => {if (err) throw err;})
-    })
-    .catch(function (error) {
-      fs.writeFile("./fuck.txt", (error), (err) => {if (err) throw err;})
-    })
-    next()
-  }
-}
- 
-
-
-
-
-
-
-
-router.post('/upload', [middleware.saveVideo, middleware.uploadVideo], async (req, res ) =>{
-
-console.log(req)
-console.log(res.route)
-console.log('the fuck happened')
-
+   }
 
  
+
+
+
+
+
+
+
+router.post('/upload', saveVideo, async (req, res ) =>{
+  let videoURL = req.videoURL
+  let title = req.body.title
+  let description = req.body.description
+  console.log(req.body.title)
+  console.log(req.body.description)
+  console.log(req.videoUrl)
+  res.status(200).send("Video Uploaded")
     
 })
 

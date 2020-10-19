@@ -37,7 +37,7 @@ uploadAuth = async (req, res, next) => {
   })
 }
 const VideoRouter = require('./routes/videos.routes')
-app.use('/api/video', uploadAuth,VideoRouter)
+app.use('/api/video', VideoRouter)
 
 
 const PORT = process.env.PORT || 5000
