@@ -20,7 +20,6 @@ exports.auth = async (req, res, next) => {
   }
   
   console.log("made it through decoder")
-  console.log(token)
 
   next()
   

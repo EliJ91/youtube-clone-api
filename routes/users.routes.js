@@ -6,23 +6,21 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const {auth} = require('../middleware/authorization.middleware')
 
-
-const cookieParser= require('cookie-parser')
-var app = express()
-app.use(cookieParser())
+//--------------------------------------------END OF IMPORTS----------------------------------------//
 
 
-//CREATE USER REQUIREMENTS
+//==================================================================================================//
+//--------------------------------------------USER ENDPOINTS----------------------------------------//
+//==================================================================================================//
+
+
+//-------------------------------------------USER REQUIREMENTS--------------------------------------//
+const User = require('../models/user');
 const UserRegistration = require('../models/user')
 
-///
 
-//LOGIN USER REQUIREMENTS
-const User = require('../models/user');
 
-///
-
-//CREATE NEW USER
+//--------------------------------------------CREATE NEW USER---------------------------------------//
 router.post('/create', async (req, res) => {
   const {username, password} = req.body
   try {
@@ -56,7 +54,7 @@ router.post('/create', async (req, res) => {
 })
 
 
-//LOGIN USER
+//-----------------------------------------------LOGIN USER-----------------------------------------//
 router.post('/login', async (req, res) => {
     try {
       const username = req.body.username
@@ -84,7 +82,7 @@ router.post('/login', async (req, res) => {
           }
           loginUser.password = undefined
           const accessToken = jwt.sign(loginUser.username, process.env.JWT_SECRET)
-          res.cookie('token', accessToken, { httpOnly: true })
+          res.cookie('token', accessToken)
           res.status(201).json({loginUser})
           
           
@@ -95,21 +93,10 @@ router.post('/login', async (req, res) => {
     }
   })
 
- router.post("/testauth", auth, async (req,res)=>{
-   console.log('made it to end point')
- })
+  router.post('/test', auth, async (req,res)=>{
+    console.log("JWT Verified")
+  })
 
-
-
-
- router.post("/deletecookie", async (req,res)=>{
-   res.clearCookie('token')
-})
-router.post("/testcookie", async (req,res)=>{
-  
-  console.log(req.cookies.token)
-  console.log(req.headers.cookie)
-})
  
 module.exports = router
 
