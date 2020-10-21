@@ -94,7 +94,8 @@ router.post('/login', async (req, res) => {
   })
 //-----------------------------------------------LOG OUT USER-----------------------------------------//
 router.post('/logout', async (req,res)=>{
-  res.clearCookie('token').end()
+  res.cookie('token', accessToken, {httpOnly: true, maxAge:0, sameSite: "none",secure: true})
+  res.end()
 })
 //-----------------------------------------------LOG OUT USER-----------------------------------------//
 router.post('/stayLogged', auth, async (req,res)=>{
