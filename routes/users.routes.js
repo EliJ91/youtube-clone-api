@@ -96,6 +96,14 @@ router.post('/login', async (req, res) => {
 router.post('/logout', async (req,res)=>{
   res.clearCookie('token').end()
 })
+//-----------------------------------------------LOG OUT USER-----------------------------------------//
+router.post('/stayLogged', auth, async (req,res)=>{
+  const token = req.cookies.token
+  const decoded = jwt.decode(token, process.env.JWT_SECRET)
+  User.find({username:decoded}, function (err, user){    
+    res.send(user).end() 
+  });
+})
 
  
 module.exports = router
