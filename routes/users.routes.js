@@ -82,7 +82,7 @@ router.post('/login', async (req, res) => {
           }
           loginUser.password = undefined
           const accessToken = jwt.sign(loginUser.username, process.env.JWT_SECRET)
-          res.cookie('token', accessToken, {httpOnly: true})
+          res.cookie('token', accessToken, {httpOnly: true, sameSite: "none"})
           res.status(201).json(loginUser)
           res.end()
         })
