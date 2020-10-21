@@ -23,9 +23,10 @@ var corsOptions = {
   origin: process.env.WEB_HOST,
   credentials: true };
 app.use(express.json())
-app.use(cors(corsOptions))
+//app.use(cors(corsOptions))
 app.use(fileUpload())
 app.use(cookieParser())
+app.options('*',cors(corsOptions))
 //---------------------------------------END OF MIDDLEWARE-----------------------------------------
 app.get('/', (req, res) => {res.send('API Status: Running')})
 
