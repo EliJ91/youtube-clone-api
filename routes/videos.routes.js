@@ -1,16 +1,17 @@
 
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
 const AWS = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid');
+const {auth} = require('../middleware/authorization.middleware')
+
+const mongoose = require('mongoose');
 
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ID,
   secretAccessKey: process.env.AWS_SECRET
 })
   async function saveVideo(req, res, next){
-    console.log('saved video hit')
     if(req.files === null){
        return res.status(400).json({msg: 'No file uploaded'})
      }
@@ -25,31 +26,51 @@ const s3 = new AWS.S3({
 
       s3.upload(params, (error,data)=>{
           if(error){res.status(500).send(error)}
-          req.videoUrl = data.Location
+          res.locals.videoUrl = data.Location
           next()
-          res.status(200)
      })
    }
 
  
 
+//-------------------------------------------USER REQUIREMENTS--------------------------------------//
+const Video = require('../models/video')
 
 
 
 
+router.post('/upload', [auth, saveVideo], async (req, res ) =>{
+  let videoURL = res.locals.videoUrl
+  const {title,description,thumbnail,genre,userId,userAvatar,username } = req.body
+  let date = new Date();
 
+  let newVid = new Video({
+    title,
+    videoURL,
+    description,
+    thumbnail,
+    genre,
+    userId,
+    username,
+    userAvatar,
+    uploadDate: date
+  })
 
-router.post('/upload', saveVideo, async (req, res ) =>{
-  let videoURL = req.videoURL
-  let title = req.body.title
-  let description = req.body.description
-  console.log(req.body.title)
-  console.log(req.body.description)
-  console.log(req.videoUrl)
-  res.status(200).send("Video Uploaded")
+  await newVid.save()
+  
+  res.status(200).json(newVid).end()
     
 })
 
+
+router.get('/allvideos', async (req,res)=>{
+  Video.find({}, function (err, videos){
+    
+    res.send(videos).end() 
+  });
+  
+     
+})
 
 module.exports = router
 

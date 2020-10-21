@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const NewVideoSchema = new mongoose.Schema({
-    title: {
+      title: {
         type: String,
         required: true,
         unique: true
@@ -10,34 +10,105 @@ const NewVideoSchema = new mongoose.Schema({
         type: String,
         required: false
       },
-      uploadDate: {
-        type: string,
+      videoURL: {
+        type: String,
         required: true
       },
-      authorId: {
-        type: Number,
+      uploadDate: {
+        type: String,
         required: true
+      },
+      username: {
+        type: String,
+        required: true
+      },
+      userId: {
+        type: String,
+        required: true
+      },
+      userAvatar: {
+        type: String,
+        required: false,
+        default: null
       },
       thumbnail: {
-        type: string,
+        type: String,
+        required: false,
+        default: "https://smartsystemstx.com/images/yootheme/pages/features/panel01.jpg"
+      },
+      views:{
+        type: Number,
+        required: false,
+        default:0
+      },
+      likes:{
+        type: Array,
+        required: false,
+        default:0
+      },
+      dislikes:{
+        type: Array,
+        required: false,
+        default:0
+      },
+      genre:{
+        type: String,
         required: false
       },
-      views,
-      likes,
-      disliked,
-      metaData,
       comments:[{
-          mongoId,
-          username,
-          comment,
-          likes,
-          dislikes,
+          mongoId:{
+            type: Number,
+            required: false
+          },
+          username:{
+            type: String,
+            required: true
+          },
+          userAvatar:{
+            type: String,
+            required: false
+          },
+          comment:{
+            type: String,
+            required: false
+          },
+          likes:{
+            type: Array,
+            required: false,
+            default:0
+          },
+          dislikes:{
+            type: Array,
+            required: false,
+            default:0
+          },
           reply:[{
-              mongoId,
-              username,
-              comment,
-              likes,
-              dislikes
+              mongoId:{
+                type: String,
+                required: true
+              },
+              username:{
+                type: String,
+                required: true
+              },
+              userAvatar:{
+                type: String,
+                required: false
+              },
+              comment:{
+                type: String,
+                required: false
+              },
+              likes:{
+                type: Array,
+                required: false,
+                default:0
+              },
+              dislikes:{
+                type: Array,
+                required: false,
+                default:0
+              }
           }]
       }]
     })

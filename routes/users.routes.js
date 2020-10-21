@@ -16,15 +16,14 @@ const {auth} = require('../middleware/authorization.middleware')
 
 //-------------------------------------------USER REQUIREMENTS--------------------------------------//
 const User = require('../models/user');
-const UserRegistration = require('../models/user')
 
 
 
 //--------------------------------------------CREATE NEW USER---------------------------------------//
 router.post('/create', async (req, res) => {
-  const {username, password} = req.body
+  const {username, password, avatar} = req.body
   try {
-    let createdUser = await UserRegistration.findOne({
+    let createdUser = await User.findOne({
       username
     })
     if (createdUser) {
@@ -36,16 +35,17 @@ router.post('/create', async (req, res) => {
         ]
       })
     } else {
-      createdUser = new UserRegistration({
+      createdUser = new User({
         username,
-        password
+        password,
+        avatar
       })
       const salt = await bcrypt.genSalt(10)
 
       createdUser.password = await bcrypt.hash(password, salt)
 
       await createdUser.save()
-      res.status(201).json(req.body)
+      res.status(201).json(req.body).end()
     }
   } catch (err) {
     console.log(err)
@@ -82,20 +82,28 @@ router.post('/login', async (req, res) => {
           }
           loginUser.password = undefined
           const accessToken = jwt.sign(loginUser.username, process.env.JWT_SECRET)
-          res.cookie('token', accessToken)
-          res.status(201).json({loginUser})
-          
-          
+          res.cookie('token', accessToken, {httpOnly: true})
+          res.status(201).json(loginUser)
+          res.end()
         })
       }
-    } catch (err) {
+    }catch(err) {
+      res.err
       console.log(err)
     }
   })
 
-  router.post('/test', auth, async (req,res)=>{
-    console.log("JWT Verified")
-  })
+
+//------------------------------------------------Test Auth-----------------------------------------//
+router.post('/test', auth, async (req,res)=>{
+  console.log("JWT Verified")
+})
+
+
+router.post('/deletecookie', async (req,res)=>{
+  res.clearCookie('token').end()
+  console.log("Clear cookie.")
+})
 
  
 module.exports = router
@@ -105,29 +113,3 @@ module.exports = router
 
 
 
-// //get one
-// router.get('/:id', (req,res)=>{
-//     res.send(req.params.id)
-// })
-// //create one
-// router.post('/', async (req,res)=>{
-//     const user = new User({
-//         email: req.body.email,
-//         password: req.body.password,
-//         adminAccount: req.body.adminAccount
-//     })
-//     try{
-//         const newUser = await user.save()
-//         res.status(201).json(newUser)
-//     }catch (err){
-//         res.status(400).json({message: err.message})
-//     }
-// })
-// //update one
-// router.patch('/:id', (req,res)=>{
-    
-// })
-// //delete one
-// router.delete('/:id', (req,res)=>{
-    
-// })

@@ -21,7 +21,12 @@ const NewUserSchema = new mongoose.Schema({
       subscribedTo: {
         type: Array,
         required: false
+      },
+      avatar:{
+        type: String,
+        required: false
       }
+      
     })
     const userModel = mongoose.model('NewUsers', NewUserSchema)
     module.exports = userModel
