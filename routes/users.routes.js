@@ -103,7 +103,7 @@ router.post('/stayLogged', auth, async (req,res)=>{
   const token = req.cookies.token
   const decoded = jwt.decode(token, process.env.JWT_SECRET)
   User.findOne({username:decoded}, function (err, user){
-    if(err){res.status(422).json(err).end()}  
+    if(err){res.send(err).end()}  
     res.send(user).end() 
   })
   
