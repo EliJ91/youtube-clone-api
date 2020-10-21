@@ -83,6 +83,7 @@ router.post('/login', async (req, res) => {
           loginUser.password = undefined
           const accessToken = jwt.sign(loginUser.username, process.env.JWT_SECRET)
           res.cookie('token', accessToken, {httpOnly: true})
+          res.setHeader("Access-Control-Allow-Origin", process.env.WEB_HOST)
           res.status(201).json(loginUser)
           res.end()
         })
@@ -98,11 +99,14 @@ router.post('/logout', async (req,res)=>{
 })
 //-----------------------------------------------LOG OUT USER-----------------------------------------//
 router.post('/stayLogged', auth, async (req,res)=>{
+  
   const token = req.cookies.token
   const decoded = jwt.decode(token, process.env.JWT_SECRET)
-  User.findOne({username:decoded}, function (err, user){  
+  User.findOne({username:decoded}, function (err, user){
+    if(err){res.status(422).json(err).end()}  
     res.send(user).end() 
-  });
+  })
+  
 })
 
  
