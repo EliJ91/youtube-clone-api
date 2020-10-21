@@ -92,17 +92,9 @@ router.post('/login', async (req, res) => {
       console.log(err)
     }
   })
-
-
-//------------------------------------------------Test Auth-----------------------------------------//
-router.post('/test', auth, async (req,res)=>{
-  console.log("JWT Verified")
-})
-
-
-router.post('/deletecookie', async (req,res)=>{
+//-----------------------------------------------LOG OUT USER-----------------------------------------//
+router.post('/logout', async (req,res)=>{
   res.clearCookie('token').end()
-  console.log("Clear cookie.")
 })
 
  
