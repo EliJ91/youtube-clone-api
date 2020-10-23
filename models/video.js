@@ -1,68 +1,70 @@
 const mongoose = require('mongoose')
 
 const NewVideoSchema = new mongoose.Schema({
-      title: {
-        type: String,
-        required: true,
-        unique: true
+      video:{
+        title: {
+          type: String,
+          required: true,
+          unique: true
+        },
+        description: {
+          type: String,
+          required: false
+        },
+        videoURL: {
+          type: String,
+          required: true
+        },
+        uploadDate: {
+          type: String,
+          required: true
+        },
+        thumbnail: {
+          type: String,
+          required: false,
+          default: "https://smartsystemstx.com/images/yootheme/pages/features/panel01.jpg"
+        },
+        views:{
+          type: Number,
+          required: false,
+          default:0
+        },
+        likes:{
+          type: Array,
+          required: false
+        },
+        dislikes:{
+          type: Array,
+          required: false
+        },
+        genre:{
+          type: String,
+          required: false
+        }
       },
-      description: {
-        type: String,
-        required: false
+      author:{
+        username: {
+          type: String,
+          required: true
+        },
+        userId: {
+          type: String,
+          required: true
+        },
+        userAvatar: {
+          type: String,
+          required: false,
+          default: null
+        }
       },
-      videoURL: {
-        type: String,
-        required: true
-      },
-      uploadDate: {
-        type: String,
-        required: true
-      },
-      username: {
-        type: String,
-        required: true
-      },
-      userId: {
-        type: String,
-        required: true
-      },
-      userAvatar: {
-        type: String,
-        required: false,
-        default: null
-      },
-      thumbnail: {
-        type: String,
-        required: false,
-        default: "https://smartsystemstx.com/images/yootheme/pages/features/panel01.jpg"
-      },
-      views:{
-        type: Number,
-        required: false,
-        default:0
-      },
-      likes:{
-        type: Array,
-        required: false,
-        default:0
-      },
-      dislikes:{
-        type: Array,
-        required: false,
-        default:0
-      },
-      genre:{
-        type: String,
-        required: false
-      },
-      comments:[{
+      comments:{
           mongoId:{
             type: Number,
             required: false
           },
           username:{
             type: String,
-            required: true
+            required: false
           },
           userAvatar:{
             type: String,
@@ -74,22 +76,20 @@ const NewVideoSchema = new mongoose.Schema({
           },
           likes:{
             type: Array,
-            required: false,
-            default:0
+            required: false
           },
           dislikes:{
             type: Array,
-            required: false,
-            default:0
+            required: false
           },
-          reply:[{
+          reply:{
               mongoId:{
                 type: String,
-                required: true
+                required: false
               },
               username:{
                 type: String,
-                required: true
+                required: false
               },
               userAvatar:{
                 type: String,
@@ -101,16 +101,14 @@ const NewVideoSchema = new mongoose.Schema({
               },
               likes:{
                 type: Array,
-                required: false,
-                default:0
+                required: false
               },
               dislikes:{
                 type: Array,
-                required: false,
-                default:0
+                required: false
               }
-          }]
-      }]
+          }
+      }
     })
     const videoModel = mongoose.model('NewVideo', NewVideoSchema)
     module.exports = videoModel

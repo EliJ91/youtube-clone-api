@@ -41,19 +41,26 @@ const Video = require('../models/video')
 
 router.post('/upload', [auth, saveVideo], async (req, res ) =>{
   let videoURL = res.locals.videoUrl
-  const {title,description,thumbnail,genre,userId,userAvatar,username } = req.body
+  const {title,description,thumbnail,genre,userId,userAvatar,username,subscribers} = req.body
   let date = new Date();
 
   let newVid = new Video({
-    title,
-    videoURL,
-    description,
-    thumbnail,
-    genre,
-    userId,
-    username,
-    userAvatar,
-    uploadDate: date
+    video:{
+      title,
+      videoURL,
+      description,
+      thumbnail,
+      genre,
+      uploadDate: date
+    },    
+    author:{
+      userId,
+      username,
+      userAvatar,
+      subscribers
+    }
+    
+    
   })
 
   await newVid.save()

@@ -15,7 +15,7 @@ const NewUserSchema = new mongoose.Schema({
         required: false
       },
       subscribers: {
-        type: Number,
+        type: Array,
         required: false
       },
       subscribedTo: {
