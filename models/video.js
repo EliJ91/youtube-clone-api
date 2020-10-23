@@ -55,13 +55,12 @@ const NewVideoSchema = new mongoose.Schema({
           type: String,
           required: false,
           default: null
-        }
+        },subscribers: {
+          type: Array,
+          required: false
+        },
       },
-      comments:{
-          mongoId:{
-            type: Number,
-            required: false
-          },
+      comments:[{
           username:{
             type: String,
             required: false
@@ -82,11 +81,11 @@ const NewVideoSchema = new mongoose.Schema({
             type: Array,
             required: false
           },
-          reply:{
-              mongoId:{
-                type: String,
-                required: false
-              },
+          date:{
+            type: String,
+            required: false
+          },
+          reply:[{
               username:{
                 type: String,
                 required: false
@@ -107,8 +106,8 @@ const NewVideoSchema = new mongoose.Schema({
                 type: Array,
                 required: false
               }
-          }
-      }
+          }]
+      }]
     })
     const videoModel = mongoose.model('NewVideo', NewVideoSchema)
     module.exports = videoModel
