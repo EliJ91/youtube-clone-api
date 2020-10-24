@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const AWS = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid');
+var ObjectId = require('mongodb').ObjectID;
 const {auth} = require('../middleware/authorization.middleware')
 
 const mongoose = require('mongoose');
@@ -33,7 +34,7 @@ const s3 = new AWS.S3({
 
  
 
-//-------------------------------------------USER REQUIREMENTS--------------------------------------//
+//-------------------------------------------UPLOAD REQUIREMENTS--------------------------------------//
 const Video = require('../models/video')
 
 
@@ -75,8 +76,16 @@ router.get('/allvideos', async (req,res)=>{
     
     res.send(videos).end() 
   });
+})
+
+router.get('/getVideo/', async (req,res)=>{
+  console.log(req.query.movieId)
+  Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
+    if(err){res.send(error).end()}
+    res.send({video}).end() 
+  })
   
-     
+ 
 })
 
 module.exports = router

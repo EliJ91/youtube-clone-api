@@ -5,7 +5,7 @@ const NewVideoSchema = new mongoose.Schema({
         title: {
           type: String,
           required: true,
-          unique: true
+          unique: false
         },
         description: {
           type: String,
@@ -13,7 +13,8 @@ const NewVideoSchema = new mongoose.Schema({
         },
         videoURL: {
           type: String,
-          required: true
+          required: true,
+          unique: true
         },
         uploadDate: {
           type: String,
@@ -55,7 +56,8 @@ const NewVideoSchema = new mongoose.Schema({
           type: String,
           required: false,
           default: null
-        },subscribers: {
+        },
+        subscribers: {
           type: Array,
           required: false
         },
