@@ -73,7 +73,6 @@ router.post('/upload', [auth, saveVideo], async (req, res ) =>{
 
 router.get('/allvideos', async (req,res)=>{
   Video.find({}, function (err, videos){
-    
     res.send(videos).end() 
   });
 })
@@ -83,7 +82,11 @@ router.get('/getVideo/', async (req,res)=>{
   Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
     if(err){res.send(error).end()}
     res.send({video}).end() 
-  })
+})
+
+router.get('/addComment', auth, async (req,res)=>{
+    console.log('good')
+})
   
  
 })
