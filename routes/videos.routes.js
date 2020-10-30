@@ -73,9 +73,10 @@ router.get('/getVideo', async (req,res)=>{
   Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
     if(err){res.send(error).end()}
     res.send({video}).end() 
+  })
 })
 //-------------------------------------------ADD COMMENT ENDPOINT-------------------------------------//
-router.post('/addComment', async (req,res)=>{
+router.post('/addComment', auth, async (req,res)=>{
   console.log(req.body)
   let newComment={}
   await Video.findById(req.body.movieId, function (err, result){    
@@ -108,7 +109,7 @@ router.post('/addComment', async (req,res)=>{
   
 })
 //-------------------------------------------ADD COMMENT REPLY ENDPOINT-------------------------------------//  
-router.post('/replyComment', async (req,res)=>{
+router.post('/replyComment', auth, async (req,res)=>{
   let videoId = req.body.commentId.split("-")[0]
   let index = req.body.commentId.split("-")[1]
   let date = new Date();
@@ -132,9 +133,13 @@ router.post('/replyComment', async (req,res)=>{
             console.log(success);
         }
       })
-      res.send('Reply Added').end()
-     })
+  
+      await Video.findById(videoId, function (err, result){
+        //console.log(result.comments[index])
+        res.send(result.comments[index]).end()
+      });
 })
+
 
 module.exports = router
 
