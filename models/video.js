@@ -63,53 +63,67 @@ const NewVideoSchema = new mongoose.Schema({
         },
       },
       comments:[{
-          username:{
-            type: String,
-            required: false
-          },
-          userAvatar:{
-            type: String,
-            required: false
-          },
-          comment:{
-            type: String,
-            required: false
-          },
-          likes:{
-            type: Array,
-            required: false
-          },
-          dislikes:{
-            type: Array,
-            required: false
-          },
-          date:{
-            type: String,
-            required: false
-          },
-          reply:[{
-              username:{
-                type: String,
-                required: false
-              },
-              userAvatar:{
-                type: String,
-                required: false
-              },
-              comment:{
-                type: String,
-                required: false
-              },
-              likes:{
-                type: Array,
-                required: false
-              },
-              dislikes:{
-                type: Array,
-                required: false
-              }
-          }]
-      }]
+        username:{
+          type: String,
+          required: false
+        },
+        userAvatar:{
+          type: String,
+          required: false
+        },
+        comment:{
+          type: String,
+          required: false
+        },
+        likes:{
+          type: Array,
+          required: false
+        },
+        dislikes:{
+          type: Array,
+          required: false
+        },
+        date:{
+          type: String,
+          required: false
+        },
+        commentId:{
+          type: String,
+          required: true
+        },
+        reply:[{
+            username:{
+              type: String,
+              required: false
+            },
+            userAvatar:{
+              type: String,
+              required: false
+            },
+            comment:{
+              type: String,
+              required: false
+            },
+            likes:{
+              type: Array,
+              required: false
+            },
+            dislikes:{
+              type: Array,
+              required: false
+            },
+            date:{
+              type: String,
+              required: false
+            },
+            commentId:{
+              type: String,
+              required: true
+            },
+            
+        }]
+    }]
     })
     const videoModel = mongoose.model('NewVideo', NewVideoSchema)
     module.exports = videoModel
+
