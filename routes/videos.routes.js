@@ -77,7 +77,9 @@ router.get('/getVideo', async (req,res)=>{
 })
 //-------------------------------------------ADD COMMENT ENDPOINT-------------------------------------//
 router.post('/addComment', auth, async (req,res)=>{
-  console.log(req.body)
+  if(!req.body.comment){
+    res.status(404).json({message: "Missing message"}).end()
+  }
   let newComment={}
   await Video.findById(req.body.movieId, function (err, result){    
     let date = new Date();
@@ -110,6 +112,9 @@ router.post('/addComment', auth, async (req,res)=>{
 })
 //-------------------------------------------ADD COMMENT REPLY ENDPOINT-------------------------------------//  
 router.post('/replyComment', auth, async (req,res)=>{
+  if(!req.body.comment){
+    res.status(404).json({message: "Missing message"}).end()
+  }
   let videoId = req.body.commentId.split("-")[0]
   let index = req.body.commentId.split("-")[1]
   let date = new Date();
