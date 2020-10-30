@@ -138,8 +138,11 @@ router.post('/replyComment', auth, async (req,res)=>{
             console.log(success);
         }
       })
-  
+  console.log(videoId)
       await Video.findById(videoId, function (err, result){
+        if(err){
+          res.send(err).end()
+        }
         res.send(result.comments[index]).end()
       });
 })

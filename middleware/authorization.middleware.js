@@ -1,20 +1,14 @@
 const jwt = require('jsonwebtoken')
-
-//--------------------------------------------END OF IMPORTS----------------------------------------//
-
-exports.auth = async (req, res, next) => {
+exports.auth = (req, res, next) => {
   if(!req.cookies.token){
-    res.status(500).json({message: "missing jwt token"})
-    return
+    res.status(500).json({message: "Missing jwt token"})
   }
   const token = req.cookies.token
-  
   try{
-  
   const decoded = jwt.verify(token, process.env.JWT_SECRET)
   next()  
   }catch(err){
-    res.status(400).json({message: "did not decode"})
+    res.status(400).json({message: "Did not decode"}).end()
   }
 }
     
