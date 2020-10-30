@@ -140,7 +140,6 @@ router.post('/replyComment', auth, async (req,res)=>{
       })
   
       await Video.findById(videoId, function (err, result){
-        //console.log(result.comments[index])
         res.send(result.comments[index]).end()
       });
 })
