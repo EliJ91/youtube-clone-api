@@ -69,6 +69,17 @@ router.get('/allvideos', async (req,res)=>{
 })
 //-------------------------------------------GET ONE VIDEO ENDPOINT-------------------------------------//
 router.get('/getVideo', async (req,res)=>{
+  
+  Video.updateOne(
+    { _id: ObjectId(req.query.movieId)}, 
+    { $inc: { "video.views": 1} },
+    function (error, success) {
+      if (error) {
+          console.log(error);
+      } else {
+          console.log(success);
+      }
+  })
   Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
     if(err){res.send(error).end()}
     res.send({video}).end() 
