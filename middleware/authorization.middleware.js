@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 exports.auth = (req, res, next) => {
   if(!req.cookies.token){
     res.status(500).json({message: "Missing jwt token"}).end()
+    console.log('JWT Missing.')
     return
   }
   const token = req.cookies.token
