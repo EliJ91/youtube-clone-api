@@ -69,7 +69,6 @@ router.get('/allvideos', async (req,res)=>{
 })
 //-------------------------------------------GET ONE VIDEO ENDPOINT-------------------------------------//
 router.get('/getVideo', async (req,res)=>{
-  console.log("/getVideo")
   Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
     if(err){res.send(error).end()}
     res.send({video}).end() 
