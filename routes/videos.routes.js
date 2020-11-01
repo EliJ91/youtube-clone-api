@@ -69,63 +69,49 @@ router.get('/allvideos', async (req,res)=>{
 })
 //-------------------------------------------GET ONE VIDEO ENDPOINT-------------------------------------//
 router.get('/getVideo', async (req,res)=>{
-  
-  Video.updateOne(
-    { _id: ObjectId(req.query.movieId)}, 
-    { $inc: { "video.views": 1} },
-    function (error, success) {
-      if (error) {
-          console.log(error);
-      } else {
-          console.log(success);
-      }
-  })
   Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
     if(err){res.send(error).end()}
-    res.send({video}).end() 
+    res.send(video).end() 
   })
 })
 //-------------------------------------------ADD COMMENT ENDPOINT-------------------------------------//
-router.post('/addComment',  async (req,res)=>{
+router.post('/addComment', auth, async (req,res)=>{
   if(!req.body.comment){
     res.status(404).json({message: "Missing message"}).end()
   }
-  let newComment={}
-  await Video.findById(req.body.movieId, function (err, result){    
-    let date = new Date();
-    newComment = {
-      username: req.body.user.username,
-      userAvatar: req.body.user.avatar,
-      date: date,
-      comment:req.body.comment,
-      likes:[],
-      dislikes:[],
-      replies:[],
-      commentId: (uuidv4())
-    }
-  });
-  Video.updateOne(
+  const newComment = {
+    username: req.body.user.username,
+    userAvatar: req.body.user.avatar,
+    date: new Date(),
+    comment:req.body.comment,
+    likes:[],
+    dislikes:[],
+    replies:[],
+    commentId: (uuidv4())
+  }
+  
+  
+  const video = await Video.findOneAndUpdate(
     { _id: req.body.movieId }, 
-    { $push: { comments: newComment} },
-    function (error, success) {
-      if (error) {
-          console.log(error);
-      } else {
-          console.log(success);
-      }
-  })
+    { $push: { comments: newComment}},
+    { useFindAndModify: false }
+  )
 
-  await Video.findById(req.body.movieId, function (err, result){
-    res.send(result).end()
-  });
+  
+  if(video){
+    const moV = await Video.findOne({ _id: ObjectId(req.body.movieId)})
+    res.send(moV).end() 
+  }
+  
   
 })
 //-------------------------------------------ADD COMMENT REPLY ENDPOINT-------------------------------------//  
-router.post('/replyComment',  async (req,res)=>{
+router.post('/replyComment', auth, async (req,res)=>{
   if(!req.body.comment){
     res.status(404).json({message: "Missing message"}).end()
   }
-  let comId = req.body.commentId
+  let comId = req.body.commentId ? req.body.commentId : req.body.replyId.split("_")[0]
+  
   let date = new Date();
   let newReply = {
         username: req.body.user.username,
@@ -134,31 +120,86 @@ router.post('/replyComment',  async (req,res)=>{
         comment:req.body.comment,
         likes:[],
         dislikes:[],
-        replyId: (uuidv4())
+        replyId: comId+"_"+uuidv4()
       }
-    Video.updateOne(
-      {commentId: comId}, 
-      {$push: { reply : newReply}} ,
-      function (error, success) {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log(success);
-        }
-      })
-  Video.find({"comments.commentId": comId}, function (err, comment){    
-    if(err){res.send(error).end()}
-    console.log(comment)
-    res.send(comment).end() 
-  })
+   
+  const comments = await Video.findOneAndUpdate(
+    {"comments.commentId": comId}, 
+    {$push: { "comments.$.reply" : newReply}},
+    { useFindAndModify: false }
+  )
 
-      // await Video.findById(videoId, function (err, result){
-      //   if(err){
-      //     res.send(err).end()
-      //   }
-      //   res.send(result.comments[index]).end()
-      // });
+  if(comments){
+    const moV = await Video.findOne({"comments.commentId": comId})
+    res.send(moV.comments).end() 
+  }
 })
+
+//-------------------------------------------INCREMENT VIDEO VIEWS ENDPOINT-------------------------------------//  
+router.get('/addView', async (req,res)=>{
+  
+  const view = await Video.updateOne(
+    { _id: ObjectId(req.query.movieId)}, 
+    { $inc: { "video.views": 1} }) 
+    if(view){
+      const moV = await Video.findOne({ _id: ObjectId(req.query.movieId)})
+      res.send(moV).end() 
+    }
+  
+})
+//-------------------------------------------LIKE VIDEO ENDPOINT-------------------------------------//  
+router.post('/likeVideo', auth, async (req,res)=>{
+  const movie = await Video.findOne({ _id: ObjectId(req.body.movieId)})
+  if(movie.video.dislikes.includes(req.body.user.username)){
+  await  Video.updateOne(
+      { _id: ObjectId(req.body.movieId)}, 
+      { $pull: { "video.dislikes": req.body.user.username} }
+    )
+  }
+  if(movie.video.likes.includes(req.body.user.username)){
+    res.send(movie).end()
+  }else{
+    const video = await Video.findOneAndUpdate(
+      { _id: ObjectId(req.body.movieId)}, 
+      { $push: { "video.likes": req.body.user.username} } ,
+      { useFindAndModify: false }
+    )
+    if(video){
+      const moV = await Video.findOne({ _id: ObjectId(req.body.movieId)})
+      res.send(moV).end() 
+    }
+    
+  }
+  
+  
+})
+//-------------------------------------------DISLIKE VIDEO ENDPOINT-------------------------------------//  
+router.post('/dislikeVideo', auth, async (req,res)=>{
+
+  const movie = await Video.findOne({ _id: ObjectId(req.body.movieId)})
+
+  if(movie.video.likes.includes(req.body.user.username)){
+  await Video.updateOne(
+      { _id: ObjectId(req.body.movieId)}, 
+      { $pull: { "video.likes": req.body.user.username} }
+    )
+  } 
+  if(movie.video.dislikes.includes(req.body.user.username)){
+    res.send(movie).end()
+  }else{
+    const video = await Video.findOneAndUpdate(
+      { _id: ObjectId(req.body.movieId)}, 
+      { $push: { "video.dislikes": req.body.user.username} } ,
+      { useFindAndModify: false }
+    )
+    if(video){
+      const moV = await Video.findOne({ _id: ObjectId(req.body.movieId)})
+      res.send(moV).end() 
+    }
+  }
+
+})
+
 
 
 module.exports = router
