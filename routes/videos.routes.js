@@ -148,7 +148,7 @@ router.get('/addView', async (req,res)=>{
   
 })
 //-------------------------------------------LIKE VIDEO ENDPOINT-------------------------------------//  
-router.post('/likeVideo', auth, async (req,res)=>{
+router.post('/likeVideo', auth async (req,res)=>{
   const movie = await Video.findOne({ _id: ObjectId(req.body.movieId)})
   if(movie.video.dislikes.includes(req.body.user.username)){
   await  Video.updateOne(
