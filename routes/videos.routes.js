@@ -70,7 +70,7 @@ router.get('/allvideos', async (req,res)=>{
 //-------------------------------------------GET ONE VIDEO ENDPOINT-------------------------------------//
 router.get('/getVideo', async (req,res)=>{
   Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
-    if(err){res.send(error).end()}
+    if(err){res.send(err).end()}
     res.send(video).end() 
   })
 })
@@ -148,7 +148,7 @@ router.get('/addView', async (req,res)=>{
   
 })
 //-------------------------------------------LIKE VIDEO ENDPOINT-------------------------------------//  
-router.post('/likeVideo', auth async (req,res)=>{
+router.post('/likeVideo', auth, async (req,res)=>{
   const movie = await Video.findOne({ _id: ObjectId(req.body.movieId)})
   if(movie.video.dislikes.includes(req.body.user.username)){
   await  Video.updateOne(
