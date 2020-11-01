@@ -116,7 +116,7 @@ const NewVideoSchema = new mongoose.Schema({
               type: String,
               required: false
             },
-            commentId:{
+            replyId:{
               type: String,
               required: true
             },

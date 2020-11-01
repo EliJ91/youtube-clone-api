@@ -86,7 +86,7 @@ router.get('/getVideo', async (req,res)=>{
   })
 })
 //-------------------------------------------ADD COMMENT ENDPOINT-------------------------------------//
-router.post('/addComment', auth, async (req,res)=>{
+router.post('/addComment',  async (req,res)=>{
   if(!req.body.comment){
     res.status(404).json({message: "Missing message"}).end()
   }
@@ -101,7 +101,7 @@ router.post('/addComment', auth, async (req,res)=>{
       likes:[],
       dislikes:[],
       replies:[],
-      commentId: (req.body.movieId+"-"+result.comments.length)
+      commentId: (uuidv4())
     }
   });
   Video.updateOne(
@@ -121,12 +121,11 @@ router.post('/addComment', auth, async (req,res)=>{
   
 })
 //-------------------------------------------ADD COMMENT REPLY ENDPOINT-------------------------------------//  
-router.post('/replyComment', auth, async (req,res)=>{
+router.post('/replyComment',  async (req,res)=>{
   if(!req.body.comment){
     res.status(404).json({message: "Missing message"}).end()
   }
-  let videoId = req.body.commentId.split("-")[0]
-  let index = req.body.commentId.split("-")[1]
+  let comId = req.body.commentId
   let date = new Date();
   let newReply = {
         username: req.body.user.username,
@@ -135,12 +134,11 @@ router.post('/replyComment', auth, async (req,res)=>{
         comment:req.body.comment,
         likes:[],
         dislikes:[],
-        commentId: (req.body.commentId)
+        replyId: (uuidv4())
       }
-  let array = `comments.${index}.reply`
     Video.updateOne(
-      {_id: videoId}, 
-      {$push: { [array] : newReply}} ,
+      {commentId: comId}, 
+      {$push: { reply : newReply}} ,
       function (error, success) {
         if (error) {
             console.log(error);
@@ -148,13 +146,18 @@ router.post('/replyComment', auth, async (req,res)=>{
             console.log(success);
         }
       })
-  console.log(videoId)
-      await Video.findById(videoId, function (err, result){
-        if(err){
-          res.send(err).end()
-        }
-        res.send(result.comments[index]).end()
-      });
+  Video.find({"comments.commentId": comId}, function (err, comment){    
+    if(err){res.send(error).end()}
+    console.log(comment)
+    res.send(comment).end() 
+  })
+
+      // await Video.findById(videoId, function (err, result){
+      //   if(err){
+      //     res.send(err).end()
+      //   }
+      //   res.send(result.comments[index]).end()
+      // });
 })
 
 
