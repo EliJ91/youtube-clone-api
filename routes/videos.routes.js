@@ -45,6 +45,7 @@ const s3 = new AWS.S3({
 
 router.post('/upload', [auth, saveVideo], async (req, res ) =>{
   console.log('Creating Video Document')
+  const defaultThumbnail = "https://smartsystemstx.com/images/yootheme/pages/features/panel01.jpg"
   let videoURL = res.locals.videoUrl
   const {title,description,thumbnail,genre,userId,userAvatar,username,subscribers} = req.body
   let date = new Date()
@@ -53,7 +54,7 @@ router.post('/upload', [auth, saveVideo], async (req, res ) =>{
       title,
       videoURL,
       description,
-      thumbnail,
+      thumbnail: thumbnail ? thumbnail : defaultThumbnail,
       genre,
       uploadDate: date
     },    

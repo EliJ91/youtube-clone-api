@@ -21,8 +21,7 @@ const NewVideoSchema = new mongoose.Schema({
         },
         thumbnail: {
           type: String,
-          required: false,
-          default: "https://smartsystemstx.com/images/yootheme/pages/features/panel01.jpg"
+          required: false
         },
         views:{
           type: Number,
