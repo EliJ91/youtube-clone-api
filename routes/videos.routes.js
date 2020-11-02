@@ -13,9 +13,9 @@ const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ID,
   secretAccessKey: process.env.AWS_SECRET
 })
-  async function saveVideo(req, res, next){
+  function saveVideo(req, res, next){
     if(req.files === null){
-       return res.status(400).json({msg: 'No file uploaded'})
+       return res.status(400).json({msg: 'No file uploaded'}.end())
      }
      const file = req.files.file
      let myFile = file.name.split(".")
@@ -26,11 +26,15 @@ const s3 = new AWS.S3({
        Body: file.data
      }
 
-      s3.upload(params, (error,data)=>{
-          if(error){res.status(500).send(error)}
-          res.locals.videoUrl = data.Location
-          next()
-     })
+      s3.upload(params)
+      .then(function (res) {
+        res.locals.videoUrl = data.Location
+        next()
+      })
+      .catch(function (error) {
+        return res.status(500).send(error).end()
+      }); 
+      
    }
 
  
