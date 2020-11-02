@@ -14,6 +14,7 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.AWS_SECRET
 })
   function saveVideo(req, res, next){
+    console.log("Called: saveVideo function")
     if(req.files === null){
        return res.status(400).json({msg: 'No file uploaded'}.end())
      }
@@ -26,15 +27,16 @@ const s3 = new AWS.S3({
        Body: file.data
      }
 
-      try{
+      
         s3.upload(params, (error,data)=>{
-          res.locals.videoUrl = data.Location
-          next()
+        if(error){
+          console.log("error",error)
+          res.status(500).send(error).end()
+        }
+        res.locals.videoUrl = data.Location
+        next()
         })
-      }catch(error){
-        console.log(error)
-        res.status(500).send(error).end()
-      }
+      
   }    
 
  
@@ -42,6 +44,7 @@ const s3 = new AWS.S3({
 //-------------------------------------------UPLOAD ENDPOINT-------------------------------------//
 
 router.post('/upload', [auth, saveVideo], async (req, res ) =>{
+  console.log('Creating Video Document')
   let videoURL = res.locals.videoUrl
   const {title,description,thumbnail,genre,userId,userAvatar,username,subscribers} = req.body
   let date = new Date()
@@ -61,8 +64,18 @@ router.post('/upload', [auth, saveVideo], async (req, res ) =>{
       subscribers
     }
   })
-  await newVid.save()
-  res.status(200).json(newVid).end()
+  console.log(newVid)
+  try{
+    const newVideo = await newVid.save()
+    if(newVideo){
+      console.log('Created Video Document')
+      res.status(200).json(newVid).end()
+    }    
+  }catch(err){
+    console.log('Error Creating Video Document')
+    res.send(err).end()
+  }
+  
 })
 
 //-------------------------------------------GET ALL VIDEOS ENDPOINT-------------------------------------//
