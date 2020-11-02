@@ -26,16 +26,16 @@ const s3 = new AWS.S3({
        Body: file.data
      }
 
-      s3.upload(params)
-      .then(function (res) {
-        res.locals.videoUrl = data.Location
-        next()
-      })
-      .catch(function (error) {
-        return res.status(500).send(error).end()
-      }); 
-      
-   }
+      try{
+        s3.upload(params, (error,data)=>{
+          res.locals.videoUrl = data.Location
+          next()
+        })
+      }catch(error){
+        console.log(error)
+        res.status(500).send(error).end()
+      }
+  }    
 
  
 
