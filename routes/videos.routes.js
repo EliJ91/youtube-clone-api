@@ -217,6 +217,124 @@ router.post('/dislikeVideo', auth, async (req,res)=>{
   }
 
 })
+//-------------------------------------------LIKE COMMENT ENDPOINT-------------------------------------//  
+router.post('/likeComment', auth, async (req,res)=>{
+  if(req.body.commentId){
+  const movie = await Video.findOne({ "comments.commentId": req.body.commentId}) 
+  const index = movie.comments.map((el)=> el.commentId).indexOf(req.body.commentId)
+  
+  if(movie.comments[index].dislikes.includes(req.body.user.username)){
+    const dislikeArray = `comments.${index}.dislikes`
+  await Video.updateOne(
+      {"comments.commentId": req.body.commentId}, 
+      { $pull: { [dislikeArray]: req.body.user.username} }
+    )
+  } 
+  if(movie.comments[index].likes.includes(req.body.user.username)){
+    res.send(movie).end()
+  }else{
+    const likeArray = `comments.${index}.likes`
+    const video = await Video.findOneAndUpdate(
+      { "comments.commentId": req.body.commentId}, 
+      { $push: {[likeArray]: req.body.user.username} } ,
+      { useFindAndModify: false }
+    )
+    if(video){
+      const moV = await Video.findOne({ "comments.commentId": req.body.commentId})
+      res.send(moV).end() 
+    }
+  }
+}else{
+    const mainCommentId = req.body.replyId.split("_")[0]
+    const movie = await Video.findOne({ "comments.commentId": mainCommentId}) 
+    const index = movie.comments.map((el)=> el.commentId).indexOf(mainCommentId)
+    const replyIndex = movie.comments[index].reply.map((el)=> el.replyId).indexOf(req.body.replyId)
+    
+    if(movie.comments[index].reply[replyIndex].dislikes.includes(req.body.user.username)){
+      const dislikeArray = `comments.${index}.reply.${replyIndex}.dislikes`
+    await Video.updateOne(
+        {"comments.commentId": mainCommentId}, 
+        { $pull: { [dislikeArray]: req.body.user.username} }
+      )
+    } 
+  
+    if(movie.comments[index].reply[replyIndex].likes.includes(req.body.user.username)){
+      res.send(movie).end()
+    }else{
+      const likeArray = `comments.${index}.reply.${replyIndex}.likes`
+      const video = await Video.findOneAndUpdate(
+        { "comments.commentId": mainCommentId}, 
+        { $push: {[likeArray]: req.body.user.username} } ,
+        { useFindAndModify: false }
+      )
+      if(video){
+        const moV = await Video.findOne({ "comments.commentId": mainCommentId})
+        res.send(moV).end() 
+      }
+    }
+  }
+
+})
+//-------------------------------------------DISLIKE COMMENT ENDPOINT-------------------------------------//  
+router.post('/dislikeComment', auth, async (req,res)=>{
+  if(req.body.commentId){
+  const movie = await Video.findOne({ "comments.commentId": req.body.commentId}) 
+  const index = movie.comments.map((el)=> el.commentId).indexOf(req.body.commentId)
+  
+  if(movie.comments[index].likes.includes(req.body.user.username)){
+    const likeArray = `comments.${index}.likes`
+  await Video.updateOne(
+      {"comments.commentId": req.body.commentId}, 
+      { $pull: { [likeArray]: req.body.user.username} }
+    )
+  } 
+
+  if(movie.comments[index].dislikes.includes(req.body.user.username)){
+    res.send(movie).end()
+  }else{
+    const dislikeArray = `comments.${index}.dislikes`
+    const video = await Video.findOneAndUpdate(
+      { "comments.commentId": req.body.commentId}, 
+      { $push: {[dislikeArray]: req.body.user.username} } ,
+      { useFindAndModify: false }
+    )
+    if(video){
+      const moV = await Video.findOne({ "comments.commentId": req.body.commentId})
+      res.send(moV).end() 
+    }
+  }
+}else{
+  const mainCommentId = req.body.replyId.split("_")[0]
+  const movie = await Video.findOne({ "comments.commentId": mainCommentId}) 
+  const index = movie.comments.map((el)=> el.commentId).indexOf(mainCommentId)
+  const replyIndex = movie.comments[index].reply.map((el)=> el.replyId).indexOf(req.body.replyId)
+  
+  if(movie.comments[index].reply[replyIndex].likes.includes(req.body.user.username)){
+    const likeArray = `comments.${index}.reply.${replyIndex}.likes`
+  await Video.updateOne(
+      {"comments.commentId": mainCommentId}, 
+      { $pull: { [likeArray]: req.body.user.username} }
+    )
+  } 
+
+  if(movie.comments[index].reply[replyIndex].dislikes.includes(req.body.user.username)){
+    res.send(movie).end()
+  }else{
+    const dislikeArray = `comments.${index}.reply.${replyIndex}.dislikes`
+    const video = await Video.findOneAndUpdate(
+      { "comments.commentId": mainCommentId}, 
+      { $push: {[dislikeArray]: req.body.user.username} } ,
+      { useFindAndModify: false }
+    )
+    if(video){
+      const moV = await Video.findOne({ "comments.commentId": mainCommentId})
+      res.send(moV).end() 
+    }
+  }
+}
+
+})
+
 
 
 
