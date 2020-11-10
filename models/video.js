@@ -39,90 +39,17 @@ const NewVideoSchema = new mongoose.Schema({
         genre:{
           type: String,
           required: false
+        },
+        ETag:{
+          type: String,
+          required: true
         }
       },
-      author:{
-        username: {
+      authorId:{
           type: String,
           required: true
         },
-        userId: {
-          type: String,
-          required: true
-        },
-        userAvatar: {
-          type: String,
-          required: false,
-          default: null
-        },
-        subscribers: {
-          type: Array,
-          required: false
-        },
-      },
       comments:[]
     })
     const videoModel = mongoose.model('NewVideo', NewVideoSchema)
     module.exports = videoModel
-
-  //   {
-  //     username:{
-  //       type: String,
-  //       required: false
-  //     },
-  //     userAvatar:{
-  //       type: String,
-  //       required: false
-  //     },
-  //     comment:{
-  //       type: String,
-  //       required: false
-  //     },
-  //     likes:{
-  //       type: Array,
-  //       required: false
-  //     },
-  //     dislikes:{
-  //       type: Array,
-  //       required: false
-  //     },
-  //     date:{
-  //       type: String,
-  //       required: false
-  //     },
-  //     commentId:{
-  //       type: String,
-  //       required: false
-  //     },
-  //     reply:[{
-  //         username:{
-  //           type: String,
-  //           required: false
-  //         },
-  //         userAvatar:{
-  //           type: String,
-  //           required: false
-  //         },
-  //         comment:{
-  //           type: String,
-  //           required: false
-  //         },
-  //         likes:{
-  //           type: Array,
-  //           required: false
-  //         },
-  //         dislikes:{
-  //           type: Array,
-  //           required: false
-  //         },
-  //         date:{
-  //           type: String,
-  //           required: false
-  //         },
-  //         replyId:{
-  //           type: String,
-  //           required: false
-  //         },
-          
-  //     }]
-  // }

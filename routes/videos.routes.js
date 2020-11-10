@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 var ObjectId = require('mongodb').ObjectID;
 const {auth} = require('../middleware/authorization.middleware')
 const Video = require('../models/video')
+const User = require('../models/user');
 
 const mongoose = require('mongoose');
 
@@ -27,13 +28,14 @@ const s3 = new AWS.S3({
        Body: file.data
      }
 
-      
         s3.upload(params, (error,data)=>{
         if(error){
           console.log("error",error)
           res.status(500).send(error).end()
         }
         res.locals.videoUrl = data.Location
+        res.locals.videoETag = data.ETag
+        console.log(data)
         next()
         })
       
@@ -47,7 +49,8 @@ router.post('/upload', [auth, saveVideo], async (req, res ) =>{
   console.log('Creating Video Document')
   const defaultThumbnail = "https://smartsystemstx.com/images/yootheme/pages/features/panel01.jpg"
   let videoURL = res.locals.videoUrl
-  const {title,description,thumbnail,genre,userId,userAvatar,username,subscribers} = req.body
+  let videoETag = res.locals.videoETag
+  const {title,description,thumbnail,genre,userId} = req.body
   let date = new Date()
   let newVid = new Video({
     video:{
@@ -56,16 +59,11 @@ router.post('/upload', [auth, saveVideo], async (req, res ) =>{
       description,
       thumbnail: thumbnail ? thumbnail : defaultThumbnail,
       genre,
-      uploadDate: date
+      uploadDate: date,
+      ETag: videoETag
     },    
-    author:{
-      userId,
-      username,
-      userAvatar,
-      subscribers
-    }
+    author:userId
   })
-  console.log(newVid)
   try{
     const newVideo = await newVid.save()
     if(newVideo){
@@ -87,10 +85,10 @@ router.get('/allvideos', async (req,res)=>{
 })
 //-------------------------------------------GET ONE VIDEO ENDPOINT-------------------------------------//
 router.get('/getVideo', async (req,res)=>{
-  Video.findOne({_id: ObjectId(req.query.movieId)}, function (err, video){    
-    if(err){res.send(err).end()}
-    res.send(video).end() 
-  })
+  const video = await Video.findById(req.query.movieId)
+  const author = await User.findById(video.authorId)
+  author.password = undefined
+  res.send([video,author]).end()
 })
 //-------------------------------------------ADD COMMENT ENDPOINT-------------------------------------//
 router.post('/addComment', auth, async (req,res)=>{
@@ -98,8 +96,7 @@ router.post('/addComment', auth, async (req,res)=>{
     res.status(404).json({message: "Missing message"}).end()
   }
   const newComment = {
-    username: req.body.user.username,
-    userAvatar: req.body.user.avatar,
+    userId: req.body.userId,
     date: new Date(),
     comment:req.body.comment,
     likes:[],
@@ -132,8 +129,7 @@ router.post('/replyComment', auth, async (req,res)=>{
   
   let date = new Date();
   let newReply = {
-        username: req.body.user.username,
-        userAvatar: req.body.user.avatar,
+        userId: req.body.userId,
         date: date,
         comment:req.body.comment,
         likes:[],
@@ -168,18 +164,18 @@ router.get('/addView', async (req,res)=>{
 //-------------------------------------------LIKE VIDEO ENDPOINT-------------------------------------//  
 router.post('/likeVideo', auth, async (req,res)=>{
   const movie = await Video.findOne({ _id: ObjectId(req.body.movieId)})
-  if(movie.video.dislikes.includes(req.body.user.username)){
+  if(movie.video.dislikes.includes(req.body.userId)){
   await  Video.updateOne(
       { _id: ObjectId(req.body.movieId)}, 
-      { $pull: { "video.dislikes": req.body.user.username} }
+      { $pull: { "video.dislikes": req.body.userId} }
     )
   }
-  if(movie.video.likes.includes(req.body.user.username)){
+  if(movie.video.likes.includes(req.body.userId)){
     res.send(movie).end()
   }else{
     const video = await Video.findOneAndUpdate(
       { _id: ObjectId(req.body.movieId)}, 
-      { $push: { "video.likes": req.body.user.username} } ,
+      { $push: { "video.likes": req.body.userId} } ,
       { useFindAndModify: false }
     )
     if(video){
@@ -196,18 +192,18 @@ router.post('/dislikeVideo', auth, async (req,res)=>{
 
   const movie = await Video.findOne({ _id: ObjectId(req.body.movieId)})
 
-  if(movie.video.likes.includes(req.body.user.username)){
+  if(movie.video.likes.includes(req.body.userId)){
   await Video.updateOne(
       { _id: ObjectId(req.body.movieId)}, 
-      { $pull: { "video.likes": req.body.user.username} }
+      { $pull: { "video.likes": req.body.userId} }
     )
   } 
-  if(movie.video.dislikes.includes(req.body.user.username)){
+  if(movie.video.dislikes.includes(req.body.userId)){
     res.send(movie).end()
   }else{
     const video = await Video.findOneAndUpdate(
       { _id: ObjectId(req.body.movieId)}, 
-      { $push: { "video.dislikes": req.body.user.username} } ,
+      { $push: { "video.dislikes": req.body.userId} } ,
       { useFindAndModify: false }
     )
     if(video){
@@ -223,20 +219,20 @@ router.post('/likeComment', auth, async (req,res)=>{
   const movie = await Video.findOne({ "comments.commentId": req.body.commentId}) 
   const index = movie.comments.map((el)=> el.commentId).indexOf(req.body.commentId)
   
-  if(movie.comments[index].dislikes.includes(req.body.user.username)){
+  if(movie.comments[index].dislikes.includes(req.body.userId)){
     const dislikeArray = `comments.${index}.dislikes`
   await Video.updateOne(
       {"comments.commentId": req.body.commentId}, 
-      { $pull: { [dislikeArray]: req.body.user.username} }
+      { $pull: { [dislikeArray]: req.body.userId} }
     )
   } 
-  if(movie.comments[index].likes.includes(req.body.user.username)){
+  if(movie.comments[index].likes.includes(req.body.userId)){
     res.send(movie).end()
   }else{
     const likeArray = `comments.${index}.likes`
     const video = await Video.findOneAndUpdate(
       { "comments.commentId": req.body.commentId}, 
-      { $push: {[likeArray]: req.body.user.username} } ,
+      { $push: {[likeArray]: req.body.userId} } ,
       { useFindAndModify: false }
     )
     if(video){
@@ -250,21 +246,21 @@ router.post('/likeComment', auth, async (req,res)=>{
     const index = movie.comments.map((el)=> el.commentId).indexOf(mainCommentId)
     const replyIndex = movie.comments[index].reply.map((el)=> el.replyId).indexOf(req.body.replyId)
     
-    if(movie.comments[index].reply[replyIndex].dislikes.includes(req.body.user.username)){
+    if(movie.comments[index].reply[replyIndex].dislikes.includes(req.body.userId)){
       const dislikeArray = `comments.${index}.reply.${replyIndex}.dislikes`
     await Video.updateOne(
         {"comments.commentId": mainCommentId}, 
-        { $pull: { [dislikeArray]: req.body.user.username} }
+        { $pull: { [dislikeArray]: req.body.userId} }
       )
     } 
   
-    if(movie.comments[index].reply[replyIndex].likes.includes(req.body.user.username)){
+    if(movie.comments[index].reply[replyIndex].likes.includes(req.body.userId)){
       res.send(movie).end()
     }else{
       const likeArray = `comments.${index}.reply.${replyIndex}.likes`
       const video = await Video.findOneAndUpdate(
         { "comments.commentId": mainCommentId}, 
-        { $push: {[likeArray]: req.body.user.username} } ,
+        { $push: {[likeArray]: req.body.userId} } ,
         { useFindAndModify: false }
       )
       if(video){
@@ -281,21 +277,21 @@ router.post('/dislikeComment', auth, async (req,res)=>{
   const movie = await Video.findOne({ "comments.commentId": req.body.commentId}) 
   const index = movie.comments.map((el)=> el.commentId).indexOf(req.body.commentId)
   
-  if(movie.comments[index].likes.includes(req.body.user.username)){
+  if(movie.comments[index].likes.includes(req.body.userId)){
     const likeArray = `comments.${index}.likes`
   await Video.updateOne(
       {"comments.commentId": req.body.commentId}, 
-      { $pull: { [likeArray]: req.body.user.username} }
+      { $pull: { [likeArray]: req.body.userId} }
     )
   } 
 
-  if(movie.comments[index].dislikes.includes(req.body.user.username)){
+  if(movie.comments[index].dislikes.includes(req.body.userId)){
     res.send(movie).end()
   }else{
     const dislikeArray = `comments.${index}.dislikes`
     const video = await Video.findOneAndUpdate(
       { "comments.commentId": req.body.commentId}, 
-      { $push: {[dislikeArray]: req.body.user.username} } ,
+      { $push: {[dislikeArray]: req.body.userId} } ,
       { useFindAndModify: false }
     )
     if(video){
@@ -309,21 +305,21 @@ router.post('/dislikeComment', auth, async (req,res)=>{
   const index = movie.comments.map((el)=> el.commentId).indexOf(mainCommentId)
   const replyIndex = movie.comments[index].reply.map((el)=> el.replyId).indexOf(req.body.replyId)
   
-  if(movie.comments[index].reply[replyIndex].likes.includes(req.body.user.username)){
+  if(movie.comments[index].reply[replyIndex].likes.includes(req.body.userId)){
     const likeArray = `comments.${index}.reply.${replyIndex}.likes`
   await Video.updateOne(
       {"comments.commentId": mainCommentId}, 
-      { $pull: { [likeArray]: req.body.user.username} }
+      { $pull: { [likeArray]: req.body.userId} }
     )
   } 
 
-  if(movie.comments[index].reply[replyIndex].dislikes.includes(req.body.user.username)){
+  if(movie.comments[index].reply[replyIndex].dislikes.includes(req.body.userId)){
     res.send(movie).end()
   }else{
     const dislikeArray = `comments.${index}.reply.${replyIndex}.dislikes`
     const video = await Video.findOneAndUpdate(
       { "comments.commentId": mainCommentId}, 
-      { $push: {[dislikeArray]: req.body.user.username} } ,
+      { $push: {[dislikeArray]: req.body.userId} } ,
       { useFindAndModify: false }
     )
     if(video){
